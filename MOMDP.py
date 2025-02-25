@@ -13,7 +13,6 @@ class MOMDP:
     
     def load_data(self, csv_file):
         df = pd.read_csv(csv_file)
-        df.drop_duplicates(inplace=True)  # Remove duplicate rows
         return df
     
     def define_states(self):
