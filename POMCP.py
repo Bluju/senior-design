@@ -133,13 +133,13 @@ class ISSEnv:
         ## bin_drop_berth# -> would ask the user for help with deciding where to place the bag
         
         if action == 'bin_drop_berth1':
-            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)] # TODO: Update this line
+            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)] 
             return state, -2, observation  # asking for help has a small cost
         if action == 'bin_drop_berth2':
-            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)] # TODO: Update this line
+            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)]
             return state, -2, observation  # asking for help has a small cost
         if action == 'bin_drop_berth3':
-            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)] # TODO: Update this line
+            observation = state if random.random() < 0.85 else self.states[1 - self.states.index(state)] 
             return state, -2, observation  # asking for help has a small cost
         if action == 'silent_drop_berth1':
             return state, -100 if state == 'blocked_berth1' else 10, None  # penalty or reward
@@ -151,7 +151,7 @@ class ISSEnv:
 # Running POMCP on the Tiger Problem
 env = ISSEnv()
 #       bin_berth_#  -> binary question (yes/no)
-pomcp = POMCP(actions=['silent_drop_berth1', 'silent_drop_berth2', 'silent_drop_berth3','bin_drop_berth1','bin_drop_berth2','bin_drop_berth3'])
+pomcp = POMCP(actions=['silent_drop_berth1', 'silent_drop_berth2', 'silent_drop_berth3','bin_drop_berth1','bin_drop_berth2','bin_drop_berth3','wh_drop_berth1','wh_drop_berth2','wh_drop_berth3'])
 initial_belief = ['blocked_berth1', 'blocked_berth2','blocked_berth3'] * 33.3  # Initial belief as particles
 
 for _ in range(10):  # Run 10 trials
@@ -167,3 +167,5 @@ print(f'')
 # careful with data manipulation, may lose data or create noise
 
 # handle duplicate data and large data set
+
+#TODO: incorporate Situational Awareness and Workload Estimation
