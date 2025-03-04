@@ -27,9 +27,16 @@ class POMDP:
     
     def lookahead_search(self, horizon):
         """Perform look-ahead search to determine the best action based on expected utility."""
+        if max(self.belief) >= 0.9:
+            return 2 if self.belief[0] > self.belief[1] else 1  # Choose the safest door when belief is >= 90%
+        
         best_action = None
         best_utility = -np.inf
-        for action in range(len(self.actions)):
+        
+        # Exclude "Listen" if at the last step of the horizon
+        available_actions = range(1, len(self.actions)) if horizon == 1 else range(len(self.actions))
+        
+        for action in available_actions:
             utility = self.simulate_action(action, self.belief, horizon, {})
             if utility > best_utility:
                 best_utility = utility
@@ -81,8 +88,13 @@ pomdp = POMDP(states, actions, observations, T, O, R, discount)
 # Run an example decision-making process
 for _ in range(5):
     action = pomdp.lookahead_search(horizon=5)  # Use look-ahead search to decide the best action
-    print(f"Chosen action: {actions[action]}")
+    print(f"Chosen action: {actions[action]}\taction: {action}")
+    if action != 0:  # If the action is not "Listen"
+        print(f"Reward: {np.dot(pomdp.belief, R[:, action])}")  # Print the expected reward
+        break # Stop the process if the action is to open a door
+    
     observation = np.random.choice(len(observations), p=O[:, action, 0])  # Sample an observation
+    print(f"Observation: {observations[observation]}")
     pomdp.update_belief(action, observation)  # Update belief based on the new observation
     print(f"Updated belief: {pomdp.belief}")  # Print the updated belief state
 
