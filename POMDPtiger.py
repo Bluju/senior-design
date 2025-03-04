@@ -1,4 +1,4 @@
-# POMDP Model
+# POMDP Model using the Tiger Example Problem
 
 import numpy as np
 
@@ -100,6 +100,10 @@ for _ in range(5):
 
 
 # Notes
+# The horizon variable is used to determine the depth of the look-ahead search
+# The simulate_action method uses memoization to avoid redundant calculations
+
+
 # if berth 1 is blocked best option is to place in berth 2
 # else the robot will be given a small penalty for placing in berth 3 which is farther
 
