@@ -28,14 +28,12 @@ class POMDP:
     
     def lookahead_search(self, horizon):
         """Perform look-ahead search to determine the best action based on expected utility."""
-        if max(self.belief) >= 0.9:
-            return 2 if self.belief[0] > self.belief[1] else 1  # Choose the safest door when belief is >= 90%
         
         best_action = None
         best_utility = -np.inf
         
         # Exclude "Listen" if at the last step of the horizon
-        available_actions = range(1, len(self.actions)) if horizon == 1 else range(len(self.actions))
+        available_actions = range(len(self.actions))
         
         for action in available_actions:
             utility = self.simulate_action(action, self.belief, horizon, {})
@@ -67,25 +65,40 @@ class POMDP:
 
 # Simplified Problem: Tiger Problem
 ## states are written as situationalAwareness_workload_block_berth_number
-states = ["low_low_block_berth_1", "low_low_block_berth_2","low_low_block_berth_3","high_high_block_berth_1"]  # Possible blocked berth locations
-actions = ["Listen", "Open-Left", "Open-Right"]  # Possible actions the agent can take
-observations = ["Hear-Left", "Hear-Right"]  # Possible observations the agent can receive
+states = ["low_low","high_high","low_high","high_low"]  # SituationalAwareness_Workload pairs
+actions = ["silent", "wh-question"]  # Communication strategies to choose from
+observations = ["blocked_berth1", "blocked_berth2"]  # Possible observations the agent can receive
 discount = 0.9  # Discount factor for future rewards
 
 # Transition Model (stays the same unless opened, then resets)
-T = np.array([[[1, 0, 0], [0.333, 0.333,0.333], [0.333, 0.333,0.333], [0.333, 0.333,0.333]],  # If berth 1 is blocked
-              [[0, 1, 0], [0.333, 0.333,0.333], [0.333, 0.333,0.333], [0.333, 0.333,0.333]],  # If berth 2 is blocked
-              [[0, 0, 1], [0.333, 0.333,0.333], [0.333, 0.333,0.333], [0.333, 0.333,0.333]]]) # If berth 3 is blocked
+# Structure: T[s,a,s']
+# where s(row)    -> current state (before taking action)
+#       a(column) -> action taken
+#       s'(depth) -> next state (after action)
+# so for each state (s) we define how each action (a) affects the probability of ending up in each next state (s')
+# Our transition model needs to be a 4 x 2 x 2 array 
 
-# TODO: Change Observation Model
-# Observation Model (uncertain hearing)
-O = np.array([[[0.85, 0.15], [0.85, 0.15], [0.85, 0.15]],  # If tiger is left
-              [[0.15, 0.85], [0.15, 0.85], [0.15, 0.85]]]) # If tiger is right
+#                silent    wh_question
+T = np.array([[[0.5, 0.5], [0.5, 0.5]],  # low_low     #low SA, low WL
+              [[0.5, 0.5], [0.5, 0.5]],  # high_high
+              [[0.6, 0.4], [0.6, 0.4]],  # low_high    #low SA, high WL   (maybe more likely to stay silent)
+              [[0.5, 0.5], [0.5, 0.5]]]) # high_low
+#               
 
-# TODO: Change Reward Model
+# Observation Model 
+# TODO: I don't think what I have is right. 
+# TODO: Are these the probability of choosing the communication strategy or probability of berth being blocked? 
+# action picked: silent       wh_question
+O = np.array([[[0.60, 0.40], [0.40, 0.60]],  # low_low
+              [[0.80, 0.20], [0.40, 0.60]],  # high_high
+              [[0.80, 0.20], [0.70, 0.30]],  # low_high
+              [[0.30, 0.70], [0.30, 0.70]]]) # high_low
+
+# TODO: Silent communication will have uncertainty in the choice 
+# TODO: Wh-question communication strategy will be very likely of being correct 
 # Reward Model
-R = np.array([[-1, -100, 10],  # If tiger is left, listening has small cost, opening wrong door is bad
-              [-1, 10, -100]]) # If tiger is right, opening the correct door gives reward
+R = np.array([[-100, 10],  # If berth1 is blocked 
+              [10, -100]]) # If berth2 is blocked
 
 # Create a POMDP instance
 pomdp = POMDP(states, actions, observations, T, O, R, discount)
@@ -120,3 +133,15 @@ for _ in range(5):
 #TODO: incorporate Situational Awareness and Workload Estimation
 
 # For testing, we can assume that a high situational awareness and low workload contribute towards greater accuracy in decision making
+
+
+# simplify the problem
+# start with two berths
+# two workloads
+# two situational awareness
+
+# give the model a state (sa, w)
+# then the model will decide which communcation strategy to use
+
+# output the confidence in all the actions
+# example: updated belief: [0.75 0.10 0.5]
