@@ -21,10 +21,19 @@ class POMDP:
         for s_prime in range(len(self.states)):
             total = 0
             for s in range(len(self.states)):
-                total += self.belief[s] * self.T[s, action, s_prime]  # Apply transition model
+                total = sum(self.belief[s] * self.T[s,action,s_prime] for s in range(len(self.states)))
+                #total += self.belief[s] * self.T[s, action, s_prime]  # Apply transition model
             new_belief[s_prime] = self.O[s_prime, action, observation] * total  # Apply observation model
         new_belief /= np.sum(new_belief)  # Normalize the belief to maintain probability distribution
         self.belief = new_belief  # Update belief state
+        
+    def sample_observation(self, action):
+        """Compute the probability of each observation given the belief and sample accordingly."""
+        obs_probs = np.zeros(len(self.observations))
+        for o in range(len(self.observations)):
+            obs_probs[o] = sum(self.belief[s] * self.O[s, action, o] for s in range(len(self.states)))
+        obs_probs /= np.sum(obs_probs)  # Normalize
+        return np.random.choice(len(self.observations), p=obs_probs)
     
     def lookahead_search(self, horizon):
         """Perform look-ahead search to determine the best action based on expected utility."""
@@ -76,20 +85,20 @@ discount = 0.9  # Discount factor for future rewards
 #       a(column) -> action taken
 #       s'(depth) -> next state (after action)
 # so for each state (s) we define how each action (a) affects the probability of ending up in each next state (s')
-# Our transition model needs to be a 4 x 2 x 2 array 
+# Our transition model needs to be a 4 x 2 x 4 array 
 
 #                silent    wh_question
-T = np.array([[[0.5, 0.5], [0.5, 0.5]],  # low_low     #low SA, low WL
-              [[0.5, 0.5], [0.5, 0.5]],  # high_high
-              [[0.6, 0.4], [0.6, 0.4]],  # low_high    #low SA, high WL   (maybe more likely to stay silent)
-              [[0.5, 0.5], [0.5, 0.5]]]) # high_low
+T = np.array([[[0.25,0.25,0.25,0.25], [0.25,0.25,0.25,0.25]],  # low_low     #low SA, low WL
+              [[0.25,0.25,0.25,0.25], [0.25,0.25,0.25,0.25]],  # high_high
+              [[0.25,0.25,0.25,0.25], [0.25,0.25,0.25,0.25]],  # low_high    #low SA, high WL   (maybe more likely to stay silent)
+              [[0.25,0.25,0.25,0.25], [0.25,0.25,0.25,0.25]]]) # high_low
 #               
 
 # Observation Model 
-# TODO: I don't think what I have is right. 
+# Defines the probability of getting an observation given the actual state 
 # TODO: Are these the probability of choosing the communication strategy or probability of berth being blocked? 
 # action picked: silent       wh_question
-O = np.array([[[0.60, 0.40], [0.40, 0.60]],  # low_low
+O = np.array([[[0.60, 0.40], [0.40, 0.60]],  # low_low state
               [[0.80, 0.20], [0.40, 0.60]],  # high_high
               [[0.80, 0.20], [0.70, 0.30]],  # low_high
               [[0.30, 0.70], [0.30, 0.70]]]) # high_low
@@ -97,21 +106,22 @@ O = np.array([[[0.60, 0.40], [0.40, 0.60]],  # low_low
 # TODO: Silent communication will have uncertainty in the choice 
 # TODO: Wh-question communication strategy will be very likely of being correct 
 # Reward Model
-R = np.array([[-100, 10],  # If berth1 is blocked 
-              [10, -100]]) # If berth2 is blocked
+R = np.array([[5, 10],      # If lowSA_lowWL state
+              [10, 5],      # high_high
+              [10, 1],      # low_high
+              [1,10]])      # high_low
 
 # Create a POMDP instance
 pomdp = POMDP(states, actions, observations, T, O, R, discount)
 
 # Run an example decision-making process
 for _ in range(5):
-    action = pomdp.lookahead_search(horizon=5)  # Use look-ahead search to decide the best action
+    action = pomdp.lookahead_search(horizon=1)  # Use look-ahead search to decide the best action
     print(f"Chosen action: {actions[action]}\taction: {action}")
-    if action != 0:  # If the action is not "Listen"
-        print(f"Reward: {np.dot(pomdp.belief, R[:, action])}")  # Print the expected reward
-        break # Stop the process if the action is to open a door
+    print(f"Reward: {round(np.dot(pomdp.belief, R[:, action]), 2)}")  # Print the expected reward
+   
     
-    observation = np.random.choice(len(observations), p=O[:, action, 0])  # Sample an observation
+    observation = pomdp.sample_observation(action)  # Sample an observation
     print(f"Observation: {observations[observation]}")
     pomdp.update_belief(action, observation)  # Update belief based on the new observation
     print(f"Updated belief: {pomdp.belief}")  # Print the updated belief state
@@ -141,7 +151,7 @@ for _ in range(5):
 # two situational awareness
 
 # give the model a state (sa, w)
-# then the model will decide which communcation strategy to use
+# then the model will decide which communication strategy to use
 
 # output the confidence in all the actions
 # example: updated belief: [0.75 0.10 0.5]
