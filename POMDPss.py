@@ -51,6 +51,9 @@ class POMDP:
                 best_action = action
         return best_action  # Return the action that maximizes expected utility
     
+    def get_most_likely_state(self):
+        return self.states[np.argmax(self.belief)]
+    
     def simulate_action(self, action, belief, horizon, cache):
         """Simulate an action's expected utility over a given horizon using memoization."""
         key = (tuple(belief), action, horizon)
@@ -117,14 +120,16 @@ pomdp = POMDP(states, actions, observations, T, O, R, discount)
 # Run an example decision-making process
 for _ in range(5):
     action = pomdp.lookahead_search(horizon=1)  # Use look-ahead search to decide the best action
+    print(f"Start state: {pomdp.get_most_likely_state()}")
     print(f"Chosen action: {actions[action]}\taction: {action}")
     print(f"Reward: {round(np.dot(pomdp.belief, R[:, action]), 2)}")  # Print the expected reward
    
-    
     observation = pomdp.sample_observation(action)  # Sample an observation
     print(f"Observation: {observations[observation]}")
     pomdp.update_belief(action, observation)  # Update belief based on the new observation
     print(f"Updated belief: {pomdp.belief}")  # Print the updated belief state
+    print(f"Most likely state: {pomdp.get_most_likely_state()}")
+    print("\n")
 
 
 # Notes
