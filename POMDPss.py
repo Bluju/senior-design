@@ -75,11 +75,11 @@ class POMDP:
         cache[key] = expected_utility  # Store result in cache
         return expected_utility
 
-# Simplified Problem: Tiger Problem
+# Simplified Problem: Space Station Problem
 ## states are written as situationalAwareness_workload_block_berth_number
 states = ["low_low","high_high","low_high","high_low"]  # SituationalAwareness_Workload pairs
 actions = ["silent", "wh-question"]  # Communication strategies to choose from
-observations = ["blocked_berth1", "blocked_berth2"]  # Possible observations the agent can receive
+observations = ["drop_berth1", "drop_berth2"]  # Possible observations the agent can receive  # command from human
 discount = 0.9  # Discount factor for future rewards
 
 # Transition Model (stays the same unless opened, then resets)
@@ -118,9 +118,12 @@ R = np.array([[5, 10],      # If lowSA_lowWL state
 pomdp = POMDP(states, actions, observations, T, O, R, discount)
 
 # Run an example decision-making process
-for _ in range(5):
-    action = pomdp.lookahead_search(horizon=1)  # Use look-ahead search to decide the best action
-    print(f"Start state: {pomdp.get_most_likely_state()}")
+for _ in range(1):
+    # give the model a specific action
+    action = 0
+    state = pomdp.states[0]
+    #action = pomdp.lookahead_search(horizon=1)  # Use look-ahead search to decide the best action
+    #print(f"Start state: {pomdp.get_most_likely_state()}")
     print(f"Chosen action: {actions[action]}\taction: {action}")
     print(f"Reward: {round(np.dot(pomdp.belief, R[:, action]), 2)}")  # Print the expected reward
    
@@ -160,3 +163,5 @@ for _ in range(5):
 
 # output the confidence in all the actions
 # example: updated belief: [0.75 0.10 0.5]
+
+# how to represent this data graphically? 3d belief functions?
