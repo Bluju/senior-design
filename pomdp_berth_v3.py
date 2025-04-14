@@ -5,7 +5,7 @@ class POMDPValueIterationSolver:
     def __init__(self, df, gamma=0.9, threshold=1e-3):
         """
         Implements a POMDP solver with belief updates and value iteration.
-        :param df: DataFrame containing (state, action, observation, end_state).  # total_reward will be excluded in this version
+        :param df: DataFrame containing (state, action, observation, end_state, total_reward).
         :param gamma: Discount factor for future rewards.
         :param threshold: Convergence threshold for value iteration.
 
@@ -38,7 +38,7 @@ class POMDPValueIterationSolver:
         self.observations = sorted(self.df["observation"].unique())
 
         # Initialize rewards, transitions, and beliefs
-        self.rewards = {row["end_state"]: row["total_reward"] for _, row in self.df.iterrows()} #TODO: Modify rewards function
+        self.rewards = {row["end_state"]: row["total_reward"] for _, row in self.df.iterrows()}
         self.transition_counts = {}
         self.transition_probs = {}
         self.beliefs = {state: 1 / len(self.states) for state in self.states}  # Uniform initial belief
@@ -175,13 +175,13 @@ df_nonmal = pd.read_csv(file_path_nonmal)
 df_mal = pd.read_csv(file_path_mal)
 
 # Extract relevant columns
-relevant_columns = df_nonmal.columns[9:13].tolist() # + [df_nonmal.columns[-1]]
+relevant_columns = df_nonmal.columns[9:13].tolist() + [df_nonmal.columns[-1]]
 df_nonmal = df_nonmal[relevant_columns]
 df_mal = df_mal[relevant_columns]
 
 # Rename columns for clarity
-df_nonmal.columns = ["state", "action", "observation", "end_state"] # "total_reward"
-df_mal.columns = ["state", "action", "observation", "end_state"]
+df_nonmal.columns = ["state", "action", "observation", "end_state", "total_reward"]
+df_mal.columns = ["state", "action", "observation", "end_state", "total_reward"]
 
 # Instantiate the improved solver
 solver_nonmal_vi = POMDPValueIterationSolver(df_nonmal)
