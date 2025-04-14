@@ -168,8 +168,8 @@ class POMDPValueIterationSolver:
 
 
 # Load the datasets
-file_path_nonmal = "create_nonmal.csv"
-file_path_mal = "create_mal.csv"
+file_path_nonmal = "create_nonmal_NoDuplicates.csv"
+file_path_mal = "create_mal_NoDuplicates.csv"
 
 df_nonmal = pd.read_csv(file_path_nonmal)
 df_mal = pd.read_csv(file_path_mal)
@@ -196,5 +196,6 @@ for state in test_states:
     results.append((state, optimal_action, confidence_score))
 
 # Convert results into a DataFrame for better visualization
+print(f'\nNon-malfunction data: {file_path_nonmal}\nMalfunction data: {file_path_mal}\n')
 df_results = pd.DataFrame(results, columns=["State", "Optimal Action", "Confidence Score"])
 print(df_results)
