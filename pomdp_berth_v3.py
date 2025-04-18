@@ -188,7 +188,7 @@ solver_nonmal_vi = POMDPValueIterationSolver(df_nonmal)
 solver_mal_vi = POMDPValueIterationSolver(df_mal)
 
 # Test with multiple states
-test_states = df_mal["state"].dropna().unique()[:5]  # Select 5 sample states for testing
+test_states = df_mal["state"].dropna().unique()[:]  # Select :n sample states for testing
 results = []
 
 for state in test_states:
