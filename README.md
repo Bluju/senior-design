@@ -85,3 +85,7 @@ Immediate reward for taking an action.
 Future value (expected reward from deeper simulations).
 Total value (sum of immediate reward and future value).
 Best action at the root based on simulations.
+
+## Notes:
+* The file for the main version of the solver is pomdp_berth_v3.py
+* The original data is in the create_mal.csv and the create_nonmal.csv files. 
