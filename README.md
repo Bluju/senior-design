@@ -20,7 +20,7 @@ py -m pip freeze > requirements.txt
 While the virtual environment is active:
 
 ```
-python POMDP.py
+python pomdp_berth_v3.py
 ```
 
 ## Project Overview
