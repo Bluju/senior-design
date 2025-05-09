@@ -164,12 +164,12 @@ class POMDPValueIterationSolver:
         else:
             confidence = belief_confidence
 
-        return optimal_action, round(confidence, 2)
+        return optimal_action, round(confidence, 4)
 
 
 # Load the datasets
-file_path_nonmal = "create_nonmal_NoDuplicates.csv"
-file_path_mal = "create_mal_NoDuplicates.csv"
+file_path_nonmal = "create_nonmal_both.csv"
+file_path_mal = "create_mal_both.csv"
 
 df_nonmal = pd.read_csv(file_path_nonmal)
 df_mal = pd.read_csv(file_path_mal)
