@@ -164,12 +164,12 @@ class POMDPValueIterationSolver:
         else:
             confidence = belief_confidence
 
-        return optimal_action, round(confidence, 2)
+        return optimal_action, round(confidence, 4)
 
 
 # Load the datasets
-file_path_nonmal = "create_nonmal.csv"
-file_path_mal = "create_mal.csv"
+file_path_nonmal = "create_nonmal_both.csv"
+file_path_mal = "create_mal_both.csv"
 
 df_nonmal = pd.read_csv(file_path_nonmal)
 df_mal = pd.read_csv(file_path_mal)
@@ -188,7 +188,7 @@ solver_nonmal_vi = POMDPValueIterationSolver(df_nonmal)
 solver_mal_vi = POMDPValueIterationSolver(df_mal)
 
 # Test with multiple states
-test_states = df_mal["state"].dropna().unique()[:5]  # Select 5 sample states for testing
+test_states = df_mal["state"].dropna().unique()[:]  # Select :n sample states for testing
 results = []
 
 for state in test_states:
@@ -196,5 +196,6 @@ for state in test_states:
     results.append((state, optimal_action, confidence_score))
 
 # Convert results into a DataFrame for better visualization
+print(f'\nNon-malfunction data: {file_path_nonmal}\nMalfunction data: {file_path_mal}\n')
 df_results = pd.DataFrame(results, columns=["State", "Optimal Action", "Confidence Score"])
 print(df_results)
